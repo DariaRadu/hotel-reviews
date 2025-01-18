@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Review Sentiment Analysis</title>
+</head>
+
+<body>
+    <h1>Hotel Review Sentiment Analysis</h1>
+
+    <form method="POST">
+        <label for="hotel_name">Enter Hotel Name:</label>
+        <input type="text" id="hotel_name" name="hotel_name" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if sentiment_results %}
+        <h2>Sentiment Results</h2>
+        <p>Hotel Name: {{ hotel_details['hotel_full_name'] }}</p>
+        <p>Hotel Average Rating: {{ hotel_details['rating'] }}</p>
+        <p>Out of {{ hotel_details['total_review_count']}} reviews, here is the breakdown:</p>
+        <p>Positive Reviews: {{ sentiment_results['positive'] }}%</p>
+        <p>Neutral Reviews: {{ sentiment_results['neutral'] }}%</p>
+        <p>Negative Reviews: {{ sentiment_results['negative'] }}%</p>
+    {% endif %}
+</body>
+</html>
