@@ -1,6 +1,6 @@
 # Hotel Review Sentiment Analyzer
 
-This project is a web application built with Flask that allows users to input a hotel name and view sentiment analysis of its reviews. The app uses Google Places API to fetch hotel reviews and TextBlob for sentiment analysis. It also integrates with SerpAPI to retrieve additional review data.
+This project is a web application built with Flask that allows users to input a hotel name and view sentiment analysis of its reviews. The app uses Google Places API to fetch hotel reviews and BERT for sentiment analysis. It also integrates with SerpAPI to retrieve additional review data.
 
 This project is used as a continuous learning grounds for myself into sentiment analysis, and will soon integrate LLMs and more advanced, production ready systems. Stay tuned!
 

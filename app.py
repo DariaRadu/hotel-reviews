@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request
 import requests
-from textblob import TextBlob 
 import os
 from serpapi import GoogleSearch
 from dotenv import load_dotenv
+from transformers import pipeline
 
 load_dotenv()
 
@@ -53,7 +53,6 @@ def get_reviews(hotel_name):
         search = GoogleSearch(params)
         results = search.get_dict()
         reviews.extend(results["reviews"])
-        print(len(reviews))
         params['next_page_token'] = results['serpapi_pagination']['next_page_token']
         params['num'] = 20
 
@@ -67,18 +66,19 @@ def analyze_sentiment(reviews):
         'negative': 0
     }
 
-    for review in reviews:
-        text = review['snippet']
-        sentiment = TextBlob(text).sentiment.polarity
+    sentiment_pipeline = pipeline(model='nlptown/bert-base-multilingual-uncased-sentiment', device=1)
+    review_snippets = [review['snippet'] for review in reviews]
+    review_sentiments = sentiment_pipeline(review_snippets)
 
-        if sentiment > 0:
-            sentiment_counts['positive'] += 1
-        elif sentiment == 0:
-            sentiment_counts['neutral'] += 1
+    for review in review_sentiments:
+        if review["label"] == "5 stars" or review["label"] == "4 stars":
+            sentiment_counts["positive"] += 1
+        elif  review["label"] == "3 stars":
+            sentiment_counts["neutral"] += 1
         else:
-            sentiment_counts['negative'] += 1
+            sentiment_counts["negative"] +=1
 
-    # Calculate percentages
+     # Calculate percentages
     reviews_count = len(reviews)
     if reviews_count > 0:
         sentiment_counts = { key: (count / reviews_count) *100 for key, count in sentiment_counts.items()}
