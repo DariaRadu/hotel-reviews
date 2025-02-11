@@ -33,13 +33,14 @@ This project is used as a continuous learning grounds for myself into sentiment 
     pip install -r requirements.txt
     ```
 
-3. Set up your OpenAI API key:
+3. Set up your API keys:
 
     Create a `.env` file in the root directory of the project and add your API keys:
 
     ```plaintext
     PLACES_API_KEY=your_api_key
     SERP_API_KEY=your_api_key
+    OPEN_AI_API_KEY=your_api_key
     ```
 
 ## Running the Project

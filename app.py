@@ -60,7 +60,7 @@ def get_reviews(hotel_name):
     for i in range(3): 
         search = GoogleSearch(params)
         results = search.get_dict()
-        reviews.extend(results["reviews"])
+        reviews.extend(results['reviews'])
         params['next_page_token'] = results['serpapi_pagination']['next_page_token']
         params['num'] = 20
 
@@ -114,10 +114,10 @@ async def analyze_sentiment_aspect_based(review_text):
     """
 
     response = await client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={ "type": "json_object" },
-        messages=[{"role": "system", "content": "You are an AI that performs Aspect-Based Sentiment Analysis."},
-                {"role": "user", "content": prompt}],
+        model='gpt-4o-mini',
+        response_format={ 'type': 'json_object' },
+        messages=[{'role': 'system', 'content': 'You are an AI that performs Aspect-Based Sentiment Analysis.'},
+                {'role': 'user', 'content': prompt}],
         temperature=0  # Set to 0 for consistent output
     )
 
