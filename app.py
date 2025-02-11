@@ -3,22 +3,30 @@ import requests
 import os
 from serpapi import GoogleSearch
 from dotenv import load_dotenv
-from transformers import pipeline
+from openai import AsyncOpenAI
+import asyncio
+import nest_asyncio
+import json
 
 load_dotenv()
+nest_asyncio.apply()
 
 app = Flask(__name__)
 
 PLACES_API_KEY=os.getenv('PLACES_API_KEY')
 SERP_API_KEY=os.getenv('SERP_API_KEY')
 
+client = AsyncOpenAI(
+  api_key=os.environ['OPEN_AI_API_KEY']
+)
+
 @app.route('/', methods=['GET', 'POST'])
-def index():
+async def index():
     if request.method == 'POST':
         hotel_name = request.form['hotel_name']
         # Fetch hotel reviews from Google Places API
         reviews, hotel_details = get_reviews(hotel_name)
-        sentiment_results = analyze_sentiment(reviews)
+        sentiment_results = await analyse_all_review_sentiments(reviews)
         return render_template('index.html', sentiment_results=sentiment_results, hotel_details=hotel_details)
     return render_template('index.html', sentiment_results=None, hotel_details=None)
 
@@ -59,30 +67,62 @@ def get_reviews(hotel_name):
     hotel_details['total_review_count'] = len(reviews)
     return reviews, hotel_details
 
-def analyze_sentiment(reviews):
-    sentiment_counts = {
-        'positive': 0,
-        'neutral': 0,
-        'negative': 0
+async def analyse_all_review_sentiments(reviews):
+    sentiment_aspects = {
+        'service': 0,
+        'cleanliness': 0,
+        'location': 0,
+        'amenities': 0,
+        'value_for_money': 0
     }
 
-    sentiment_pipeline = pipeline(model='nlptown/bert-base-multilingual-uncased-sentiment', device=1)
     review_snippets = [review['snippet'] for review in reviews]
-    review_sentiments = sentiment_pipeline(review_snippets)
+    tasks = [analyze_sentiment_aspect_based(review) for review in review_snippets]
+    aspect_based_review_results = await asyncio.gather(*tasks)
 
-    for review in review_sentiments:
-        if review["label"] == "5 stars" or review["label"] == "4 stars":
-            sentiment_counts["positive"] += 1
-        elif  review["label"] == "3 stars":
-            sentiment_counts["neutral"] += 1
-        else:
-            sentiment_counts["negative"] +=1
+    for result in aspect_based_review_results:
+        result_json = json.loads(result)
+        for aspect in sentiment_aspects.keys():
+            sentiment_aspects[aspect] += int(result_json[aspect]['sentiment'])
 
-     # Calculate percentages
-    reviews_count = len(reviews)
-    if reviews_count > 0:
-        sentiment_counts = { key: (count / reviews_count) *100 for key, count in sentiment_counts.items()}
-    return sentiment_counts
+    print(sentiment_aspects)
+    return sentiment_aspects
+
+async def analyze_sentiment_aspect_based(review_text):
+    prompt = f"""
+        You are an expert in sentiment analysis for hotel reviews.
+        Analyze the following review and classify sentiment for key aspects:
+        
+        - Service
+        - Cleanliness
+        - Location
+        - Amenities
+        - Value for Money
+
+        Provide sentiment scores (-1 = Negative, 0 = Neutral, 1 = Positive) and a really short explanation.
+
+        Review: "{review_text}"
+        
+        Respond directly in JSON format, which can be parsed easily:
+        {{
+            "service": {{"sentiment": ..., "explanation": "..."}},
+            "cleanliness": {{"sentiment": ..., "explanation": "..."}},
+            "location": {{"sentiment": ..., "explanation": "..."}},
+            "amenities": {{"sentiment": ..., "explanation": "..."}},
+            "value_for_money": {{"sentiment": ..., "explanation": "..."}}
+        }}
+    """
+
+    response = await client.chat.completions.create(
+        model="gpt-4o-mini",
+        response_format={ "type": "json_object" },
+        messages=[{"role": "system", "content": "You are an AI that performs Aspect-Based Sentiment Analysis."},
+                {"role": "user", "content": prompt}],
+        temperature=0  # Set to 0 for consistent output
+    )
+
+    result = response.choices[0].message.content
+    return result
 
 if __name__ == '__main__':
     app.run(debug=True)

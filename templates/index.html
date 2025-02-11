@@ -20,9 +20,11 @@
         <p>Hotel Name: {{ hotel_details['hotel_full_name'] }}</p>
         <p>Hotel Average Rating: {{ hotel_details['rating'] }}</p>
         <p>Out of {{ hotel_details['total_review_count']}} reviews, here is the breakdown:</p>
-        <p>Positive Reviews: {{ sentiment_results['positive'] }}%</p>
-        <p>Neutral Reviews: {{ sentiment_results['neutral'] }}%</p>
-        <p>Negative Reviews: {{ sentiment_results['negative'] }}%</p>
+        <p>Service score: {{ sentiment_results['service'] }}</p>
+        <p>Cleanliness score: {{ sentiment_results['cleanliness'] }}</p>
+        <p>Location score: {{ sentiment_results['location'] }}</p>
+        <p>Amenities score: {{ sentiment_results['amenities'] }}</p>
+        <p>Value for money score: {{ sentiment_results['value_for_money'] }}</p>
     {% endif %}
 </body>
 </html>
