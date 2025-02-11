@@ -9,7 +9,7 @@ This project is used as a continuous learning grounds for myself into sentiment 
 ## Features
 
 - **Fetch hotel reviews**: Get reviews for a given hotel using Google Places API and SerpAPI.
-- **Sentiment analysis**: Analyze the sentiment of reviews using TextBlob (positive, neutral, negative).
+- **Sentiment analysis**: Analyze the sentiment of reviews using LLMs to deduce aspect based sentiment analysis (service, cleanliness, location etc.).
 - **Display results**: Present sentiment statistics and hotel details (name, rating, and total review count).
 
 ## Requirements
